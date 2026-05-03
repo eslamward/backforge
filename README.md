@@ -30,8 +30,14 @@ It automatically creates:
 
 ### Option 1: Download Release Binary
 
-Download the latest binary from the releases [page](https://github.com/eslamward/backforge/releases) and place it inside your project folder.
+Download the latest binary
+*[Linux](https://github.com/eslamward/backforge/releases/download/v1.0.0/linux.backforge)
+*[Windows](https://github.com/eslamward/backforge/releases/download/v1.0.0/windows.backforge)
+*[Mac-Amd64](https://github.com/eslamward/backforge/releases/download/v1.0.0/mac.amd64.backforge)
+*[Mac-Arm64](https://github.com/eslamward/backforge/releases/download/v1.0.0/mac.arm64.backforge)
+or from the releases [page](https://github.com/eslamward/backforge/releases) and place it inside your project folder.
 
+# Note : The <os>.backforge and the app.yaml file must be in the same folder
 ### Option 2: Build from source
 
 ```bash
@@ -46,12 +52,14 @@ Then move it to your bin folder.
 
 Write an `app.yaml` file with your entities like this: [YAML File Structure Example](#yaml-file-structure-example)
 
-Then run BackForge from the `bin` folder in your OS directory.
 
 ```bash
 open your terminal in the folder that contains the BackForge tool
+
 backforge build    → generates the code and builds the app
 backforge serve    → serves the application on port 8080
+
+or if you use the latest binary it will be `<os>.backforge` build er `(windows.backforg buil)` 
 ```
 
 You can verify the API using:
