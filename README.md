@@ -61,13 +61,18 @@ backforge serve    → serves the application on port 8080
 
 or if you use the latest binary it will be `<os>.backforge` build er `(windows.backforg buil)` 
 ```
+* when run build cli the go1.25.* with downloaded and ziped in the .chach folder in your project folder
+* Generate project file
+* get chi router
+* get sqlite
+* build the code to the app binary  `bin/app`
 
 You can verify the API using:
 [http://localhost:8080/api/health](http://localhost:8080/api/health)
 
 This endpoint lists all available APIs for generated entities.
 
-After build, the output will be located in `bin/<os-folder>/` including the `app.db` file.
+After build, the output will be located in `bin/` including the `app.db` file.
 
 ---
 
