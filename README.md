@@ -32,12 +32,12 @@ It automatically creates:
 
 Download the latest binary
 *[Linux](https://github.com/eslamward/backforge/releases/download/v1.0.0/linux.backforge)
-*[Windows](https://github.com/eslamward/backforge/releases/download/v1.0.0/windows.backforge)
+*[Windows](https://github.com/eslamward/backforge/releases/download/v1.0.0/windows.backforge.exe)
 *[Mac-Amd64](https://github.com/eslamward/backforge/releases/download/v1.0.0/mac.amd64.backforge)
 *[Mac-Arm64](https://github.com/eslamward/backforge/releases/download/v1.0.0/mac.arm64.backforge)
 or from the releases [page](https://github.com/eslamward/backforge/releases) and place it inside your project folder.
 
-# Note : The <os>.backforge and the app.yaml file must be in the same folder
+# Note : The [os].backforge like `windows`.bachforge.exe and the app.yaml file must be in the same folder
 ### Option 2: Build from source
 
 ```bash
@@ -61,7 +61,8 @@ backforge serve    → serves the application on port 8080
 
 or if you use the latest binary it will be `<os>.backforge` build er `(windows.backforg buil)` 
 ```
-* when run build cli the go1.25.* with downloaded and ziped in the .chach folder in your project folder
+* when run build cli the go1.25.* will downloaded and ziped in the .chach folder in your project folder
+and you don't need to download the go again if you use the tool in the same folder that .chach found
 * Generate project file
 * get chi router
 * get sqlite
