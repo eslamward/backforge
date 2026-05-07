@@ -9,6 +9,14 @@ import (
 func generateMain(cfg *parser.ServerConfig) string {
 	dbPort := cfg.Port
 	dbEnv := cfg.Env
+
+	if dbPort == "" {
+		dbPort = "8080"
+	}
+	if dbEnv == "" {
+		dbEnv = "dev"
+	}
+
 	return fmt.Sprintf(`package main
 
 import (
