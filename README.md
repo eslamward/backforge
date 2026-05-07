@@ -31,13 +31,15 @@ It automatically creates:
 ### Option 1: Download Release Binary
 
 Download the latest binary
-*[Linux](https://github.com/eslamward/backforge/releases/download/v1.0.0/linux.backforge)
-*[Windows](https://github.com/eslamward/backforge/releases/download/v1.0.0/windows.backforge.exe)
-*[Mac-Amd64](https://github.com/eslamward/backforge/releases/download/v1.0.0/mac.amd64.backforge)
-*[Mac-Arm64](https://github.com/eslamward/backforge/releases/download/v1.0.0/mac.arm64.backforge)
+*[Linux-Amd64](https://github.com/eslamward/backforge/releases/download/v1.1.0/backforge-linux-amd64.tar.gz)
+*[Linux-Arm64](https://github.com/eslamward/backforge/releases/download/v1.1.0/backforge-linux-arm64.tar.gz)
+*[Windows-Amd64](https://github.com/eslamward/backforge/releases/download/v1.1.0/backforge-windows-amd64.zip)
+*[Windows-Arm64](https://github.com/eslamward/backforge/releases/download/v1.1.0/backforge-windows-arm64.zip)
+*[Mac-Amd64](https://github.com/eslamward/backforge/releases/download/v1.1.0/backforge-darwin-amd64.tar.gz)
+*[Mac-Arm64](https://github.com/eslamward/backforge/releases/download/v1.1.0/backforge-darwin-arm64.tar.gz)
 or from the releases [page](https://github.com/eslamward/backforge/releases) and place it inside your project folder.
 
-# Note : The [os].backforge like `windows`.bachforge.exe and the app.yaml file must be in the same folder
+# Note : The backforge and the app.yaml file must be in the same folder
 ### Option 2: Build from source
 
 ```bash
