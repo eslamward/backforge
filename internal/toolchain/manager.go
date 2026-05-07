@@ -42,7 +42,11 @@ func EnsureGo() (string, error) {
 	}
 
 	// unzip
-	err = Unzip(zipPath, ".cache")
+	if runtime.GOOS == "windows" {
+		err = Unzip(zipPath, ".cache")
+	} else {
+		err = UntarGz(zipPath, ".cache")
+	}
 	if err != nil {
 		return "", err
 	}
