@@ -13,6 +13,8 @@ func GenerateError() string {
 	VALIDATION  = "validation"
 	BAD_REQUEST = "bad_request"
 	UNIQUE_CONSTRAINTS = "unique_constraints"
+	FOREIGN_CONSTRAINTS = "foreign_constraints"
+
 )
 
 	type BackForgeError struct {

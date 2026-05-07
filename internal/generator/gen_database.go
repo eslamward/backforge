@@ -2,34 +2,91 @@ package generator
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/eslamward/backforge/internal/parser"
 )
 
-func InitDB(args ...string) string {
+func InitDB(cfg *parser.DatabaseConfig, args ...string) string {
+
+	dsn := buildDSN(cfg)
+	im := `
+	
+	"fmt"
+	"strings"
+	`
+	if cfg.Type == "sqlite" {
+		im = ""
+	}
 
 	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf(`
+		package database
 
-	sb.WriteString(`
-	package database
+		import (
+			"database/sql"
+			"log"
+			%s
+			%s
+		
+		)
 
-import (
-	"database/sql"
-	"log"
-	_ "modernc.org/sqlite"
-)
+		func InitDB() *sql.DB {
 
-func InitDB() *sql.DB {
-	db, err := sql.Open("sqlite", "file:./output/bin/app.db")
-	if err != nil {
-		log.Fatal("error opening db:", err)
+		
+
+		`, im, getDriverImport(cfg.Type)))
+	if cfg.Type != "sqlite" {
+		fmt.Println(cfg.Type, cfg.Name)
+		sb.WriteString(fmt.Sprintf(`
+
+			db,err := %s
+			if err != nil{
+				log.Fatal("error openinig database :",err)
+			}
+		`, openRootConnection(cfg)))
+		sb.WriteString(fmt.Sprintf(`_,err = db.Exec("CREATE DATABASE %s")`, cfg.Name))
+		sb.WriteString(fmt.Sprintf(
+			`
+			if err != nil{
+				if strings.Contains(err.Error(),"exists"){
+				fmt.Println("database already created")
+				}else{		
+				log.Fatal("error creating database",err)
+
+			}
+		}
+			`))
+
+		sb.WriteString(fmt.Sprintf(`
+			db, err = sql.Open("%s", %s)
+			if err != nil {
+				log.Fatal("error opening db:", err)
+			}
+		`, getDriverName(cfg.Type), dsn))
+	} else {
+
+		sb.WriteString(fmt.Sprintf(`
+			db, err := sql.Open("%s", %s)
+			if err != nil {
+				log.Fatal("error opening db:", err)
+			}
+		`, getDriverName(cfg.Type), dsn))
+		sb.WriteString(`
+		if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
+			log.Fatal("failed to enable foreign keys:", err)
 	}
-	db.Exec("PRAGMA foreign_keys = ON;")
-
 `)
+	}
+
 	for _, mod := range args {
-		sb.WriteString(fmt.Sprintf("db.Exec(%sTable)\n", mod))
+		sb.WriteString(fmt.Sprintf("_,err= db.Exec(%sTable)\n", mod))
+		sb.WriteString(`
+		if err != nil{
+			log.Fatal("error creating tables:",err)
+		}
+			`)
 	}
 
 	sb.WriteString(`
@@ -40,20 +97,26 @@ func InitDB() *sql.DB {
 
 	return sb.String()
 }
-func GenerateCreateTable(schema *parser.Schema) string {
+func GenerateCreateTable(schema *parser.Schema, cfg *parser.DatabaseConfig) string {
 	var sb strings.Builder
 	sb.WriteString("package database\n\n")
 	for _, model := range schema.Models {
 		var cols []string
 		var fks []string
 		for _, f := range model.Fields {
-			col := f.Name + " " + strings.ToUpper(f.Type)
+			col := f.Name + " " + mapSQLType(f, cfg.Type)
 
-			if f.Primary {
-				col += " PRIMARY KEY"
-			}
 			if f.AutoIncrement {
-				col += " AUTOINCREMENT"
+				err := validateAutoIncrement(f, cfg.Type)
+				if err != nil {
+					log.Fatal("error validation autoncrement: ", err)
+				}
+				col += " " + getAutoIncrementSQL(cfg.Type)
+			}
+
+			if f.Primary && cfg.Type != "sqlite" {
+
+				col += " PRIMARY KEY"
 			}
 			if f.NotNull {
 				col += " NOT NULL"

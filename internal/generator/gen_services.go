@@ -111,6 +111,7 @@ func createSer(nameLower, nameCapital string, model parser.Model) string {
 		sb.WriteString(fmt.Sprintf(
 			`
 	selected%s, err := %s.%sRepo.GetBy%s(%s.%s)//Todo check if uniqe field put this
+
 	if selected%s != nil {
 		return backerror.New(backerror.UNIQUE_CONSTRAINTS ,
 		errors.New("this %s already exists"),

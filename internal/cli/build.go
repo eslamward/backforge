@@ -23,7 +23,7 @@ func Build() {
 	generator.GenerateProject(schema)
 
 	//ceate mod file enshure go and download it and get some packege
-	err = toolchain.RunGoBuild("output")
+	err = toolchain.RunGoBuild("output", generator.GetDriverGoGet(schema.Configuration.DatabaseConfig.Type))
 	if err != nil {
 		fmt.Println("Build error:", err)
 		return

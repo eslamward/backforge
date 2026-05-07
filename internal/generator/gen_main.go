@@ -1,8 +1,14 @@
 package generator
 
-import "fmt"
+import (
+	"fmt"
 
-func generateMain() string {
+	"github.com/eslamward/backforge/internal/parser"
+)
+
+func generateMain(cfg *parser.ServerConfig) string {
+	dbPort := cfg.Port
+	dbEnv := cfg.Env
 	return fmt.Sprintf(`package main
 
 import (
@@ -27,10 +33,10 @@ func main() {
 
 	server := http.Server{
 		Handler: router,
-		Addr:    ":8080",
+		Addr:    ":%s",
 	}
 
-	fmt.Println("Server running on :8080")
+	fmt.Println("Server running on :%s on %s mode")
 
 	err := server.ListenAndServe()
 	if err != nil {
@@ -38,5 +44,5 @@ func main() {
 	}
 
 }
-`)
+`, dbPort, dbPort, dbEnv)
 }

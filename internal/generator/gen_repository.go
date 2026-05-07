@@ -7,7 +7,7 @@ import (
 	"github.com/eslamward/backforge/internal/parser"
 )
 
-func GenertateRepo(model parser.Model) string {
+func GenertateRepo(model parser.Model, cfg *parser.DatabaseConfig) string {
 	var sb strings.Builder
 
 	nameCapital := toPascalCase(toSingular(model.Name))
@@ -23,6 +23,7 @@ func GenertateRepo(model parser.Model) string {
 
 	"database/sql"
 	"errors"
+	"strings"
 	"fmt"
 
 	`)
@@ -69,41 +70,42 @@ func GenertateRepo(model parser.Model) string {
 		toPascalCase(field.Name), mapType(field.Type), mapType(primaryField(model).Type),
 		nameLower, nameCapital, nameLower, nameLower))
 
-	sb.WriteString(createRepo(model, nameLower, nameCapital))
+	sb.WriteString(createRepo(model, nameLower, nameCapital, cfg))
 	/*******Update******/
 
-	sb.WriteString(updateRepo(model, nameLower, nameCapital))
+	sb.WriteString(updateRepo(model, nameLower, nameCapital, cfg))
 	/*******Get By******/
-	sb.WriteString(getByRepo(model, nameLower, nameCapital))
+	sb.WriteString(getByRepoUnique(model, nameLower, nameCapital, cfg))
 	/*******GET******/
-	sb.WriteString(getRepo(model, nameLower, nameCapital))
+	sb.WriteString(getRepo(model, nameLower, nameCapital, cfg))
 
 	/*******GET ALL******/
 	sb.WriteString(getAllRepo(field, model, nameLower, nameCapital))
 	/*******Delete******/
-	sb.WriteString(deleteRepo(model, nameLower))
+	sb.WriteString(deleteRepo(model, nameLower, cfg))
 
 	return sb.String()
 }
 
-func createRepo(model parser.Model, nameLower, nameCapital string) string {
+func createRepo(model parser.Model, nameLower, nameCapital string, cfg *parser.DatabaseConfig) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(`
 	func (%s *%sRepository) Create(%s *models.%s) *backerror.BackForgeError {	
 		%s
 
-	%s.%s = id
+	%s.%s = %s
+	//Todo Return all auto incremnet field and default field
 	return nil
 }
 	`, nameLower[0:1], nameLower, nameLower, nameCapital,
-		insertMatchField(model), nameLower,
-		toPascalCase(autoIncrementField(model).Name),
+		insertMatchField(model, cfg), nameLower,
+		toPascalCase(primaryField(model).Name), primaryField(model).Name,
 	))
 	return sb.String()
 
 }
 
-func updateRepo(model parser.Model, nameLower, nameCapital string) string {
+func updateRepo(model parser.Model, nameLower, nameCapital string, cfg *parser.DatabaseConfig) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(`
 	func (%s *%sRepository) Update(%s *models.%s) *backerror.BackForgeError {
@@ -131,12 +133,13 @@ func updateRepo(model parser.Model, nameLower, nameCapital string) string {
 	}
 	return nil
 	}
-	`, nameLower[0:1], nameLower, nameLower, nameCapital, updateMatchedField(model), nameLower, nameLower))
+	`, nameLower[0:1], nameLower, nameLower, nameCapital,
+		updateMatchedField(model, cfg), nameLower, nameLower))
 
 	return sb.String()
 
 }
-func getRepo(model parser.Model, nameLower, nameCapital string) string {
+func getRepo(model parser.Model, nameLower, nameCapital string, cfg *parser.DatabaseConfig) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(`
 	func (%s *%sRepository) Get(%s %s) (*models.%s,*backerror.BackForgeError){ 
@@ -160,7 +163,7 @@ func getRepo(model parser.Model, nameLower, nameCapital string) string {
 	}
 	`,
 		nameLower[0:1], nameLower, primaryField(model).Name, mapType(primaryField(model).Type),
-		nameCapital, getMatchedFieldForId(model),
+		nameCapital, getMatchedFieldForId(model, cfg),
 		nameLower, primaryField(model).Name, nameLower, nameLower,
 	))
 	return sb.String()
@@ -219,7 +222,7 @@ func getAllRepo(field *parser.Field, model parser.Model, nameLower, nameCapital 
 
 }
 
-func getByRepo(model parser.Model, nameLower, nameCapital string) string {
+func getByRepoUnique(model parser.Model, nameLower, nameCapital string, cfg *parser.DatabaseConfig) string {
 	var sb strings.Builder
 	if uniqeField(model) != nil {
 		sb.WriteString(fmt.Sprintf(`
@@ -244,18 +247,18 @@ func getByRepo(model parser.Model, nameLower, nameCapital string) string {
 	}
 	`,
 			nameLower[0:1], nameLower, toPascalCase(uniqeField(model).Name), uniqeField(model).Name,
-			mapType(uniqeField(model).Type), nameCapital, getMatchedField(model),
+			mapType(uniqeField(model).Type), nameCapital, getMatchedField(model, cfg),
 			nameLower, uniqeField(model).Name, nameLower, nameLower,
 		))
 	}
 
 	return sb.String()
 }
-func deleteRepo(model parser.Model, nameLower string) string {
+func deleteRepo(model parser.Model, nameLower string, cfg *parser.DatabaseConfig) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(`
 	func (%s *%sRepository) Delete(%s %s) *backerror.BackForgeError {
-	query := "DELETE FROM %s WHERE %s = ?"
+	query := "DELETE FROM %s WHERE %s = %s"
 
 	result, err := %s.DB.Exec(query, %s)
 	if err != nil {
@@ -286,7 +289,7 @@ func deleteRepo(model parser.Model, nameLower string) string {
 }
 	`, nameLower[0:1], nameLower, primaryField(model).Name,
 		mapType(primaryField(model).Type), model.Name,
-		primaryField(model).Name, nameLower[0:1], primaryField(model).Name, nameLower, nameLower,
+		primaryField(model).Name, getSinglePlaceholder(cfg.Type), nameLower[0:1], primaryField(model).Name, nameLower, nameLower,
 	))
 
 	return sb.String()

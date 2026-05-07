@@ -51,7 +51,7 @@ func EnsureGo() (string, error) {
 	return GoPath(), nil
 }
 
-func RunGoBuild(projectDir string) error {
+func RunGoBuild(projectDir string, db string) error {
 
 	goPath, err := EnsureGo()
 	if err != nil {
@@ -72,7 +72,7 @@ func RunGoBuild(projectDir string) error {
 	if err != nil {
 		fmt.Println(err)
 	}
-	err = run(goPath, projectDir, "get", "modernc.org/sqlite")
+	err = run(goPath, projectDir, "get", db)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -32,7 +32,7 @@ func GenerateProject(schema *parser.Schema) {
 		fmt.Printf("%s handler created successfully\n", model.Name)
 
 		/**/
-		contentRepo := GenertateRepo(model)
+		contentRepo := GenertateRepo(model, &schema.Configuration.DatabaseConfig)
 		err = filesystem.WriteProjectFile(internal, "repository/"+model.Name+"_repository"+".go", contentRepo)
 		if err != nil {
 			fmt.Println("Error", err)
@@ -58,7 +58,7 @@ func GenerateProject(schema *parser.Schema) {
 	}
 
 	/**/
-	contentDB := InitDB(modelsName...)
+	contentDB := InitDB(&schema.Configuration.DatabaseConfig, modelsName...)
 	err := filesystem.WriteProjectFile(internal, "database/database.go", contentDB)
 	if err != nil {
 		fmt.Println("Error", err)
@@ -66,7 +66,7 @@ func GenerateProject(schema *parser.Schema) {
 	fmt.Printf("Database Init successfully\n")
 
 	/**/
-	contentDBTables := GenerateCreateTable(schema)
+	contentDBTables := GenerateCreateTable(schema, &schema.Configuration.DatabaseConfig)
 	err = filesystem.WriteProjectFile(internal, "database/database_tables.go", contentDBTables)
 	if err != nil {
 		fmt.Println("Error", err)
@@ -122,7 +122,7 @@ func GenerateProject(schema *parser.Schema) {
 	fmt.Printf("Error package created successfully\n")
 
 	/**/
-	contentMain := generateMain()
+	contentMain := generateMain(&schema.Configuration.ServerConfig)
 	err = filesystem.WriteProjectFile("cmd", "main.go", contentMain)
 	if err != nil {
 		fmt.Println("Error", err)

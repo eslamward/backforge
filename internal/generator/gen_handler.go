@@ -57,7 +57,7 @@ func New%sHandler(%sServices services.%sService) *%sHandler {
 	sb.WriteString(createHand(nameLower, nameCapital))
 	// GET
 
-	sb.WriteString(getHand(nameLower, nameCapital))
+	sb.WriteString(getHand(nameLower, nameCapital, model))
 
 	// GET By UniqField
 	sb.WriteString(getByUniqueHand(nameLower, nameCapital, model))
@@ -67,10 +67,10 @@ func New%sHandler(%sServices services.%sService) *%sHandler {
 	sb.WriteString(getAllHand(nameLower, nameCapital, model))
 
 	// UPDATE
-	sb.WriteString(updateHand(nameLower, nameCapital))
+	sb.WriteString(updateHand(nameLower, nameCapital, model))
 
 	// DELETE
-	sb.WriteString(deleteHand(nameLower, nameCapital))
+	sb.WriteString(deleteHand(nameLower, nameCapital, model))
 
 	return sb.String()
 }
@@ -112,28 +112,29 @@ func createHand(nameLower, nameCapital string) string {
 	return sb.String()
 }
 
-func getHand(nameLower, nameCapital string) string {
+func getHand(nameLower, nameCapital string, model parser.Model) string {
 	var sb strings.Builder
-
+	pr := toPascalCase(primaryField(model).Name)
+	sPr := primaryField(model).Name
 	sb.WriteString(fmt.Sprintf(`
 	func (%s *%sHandler)Get%s(w http.ResponseWriter, r *http.Request) {
-		var req%s models.Requested%sId
+		var req%s models.Requested%s%s
 
 	err := readJson(w, r, &req%s)
 	if err != nil {
 		badErrorRequest(w, r, err)
 		return
 	}
-	if req%s.Id == 0 {
-		badErrorRequest(w, r, errors.New("please put the id field in the json body"))
+	if req%s.%s == 0 {
+		badErrorRequest(w, r, errors.New("please put the %s field in the json body"))
 		return
 	}
-	if req%s.Id < 0 {
-		badErrorRequest(w, r, errors.New("please use valid id"))
+	if req%s.%s < 0 {
+		badErrorRequest(w, r, errors.New("please use valid %s"))
 		return
 	}
 
-	%s, serErr := %s.%sServices.Get%s(req%s.Id)
+	%s, serErr := %s.%sServices.Get%s(req%s.%s)
 	if serErr != nil {
 			mapResponseToError(serErr,w,r)
 		return
@@ -145,9 +146,10 @@ func getHand(nameLower, nameCapital string) string {
 	}
 	}
 `, nameLower[0:1], nameLower, nameCapital,
-		nameCapital, nameCapital, nameCapital,
-		nameCapital, nameCapital, nameLower,
-		nameLower[0:1], nameLower, nameCapital, nameCapital, nameLower, nameLower))
+		nameCapital, nameCapital, pr, nameCapital,
+		nameCapital, pr, sPr, nameCapital, pr, sPr, nameLower,
+		nameLower[0:1], nameLower, nameCapital, nameCapital,
+		pr, nameLower, nameLower))
 	return sb.String()
 }
 
@@ -215,8 +217,10 @@ func getAllHand(nameLower, nameCapital string, model parser.Model) string {
 	return sb.String()
 }
 
-func updateHand(nameLower, nameCapital string) string {
+func updateHand(nameLower, nameCapital string, model parser.Model) string {
 	var sb strings.Builder
+	pr := toPascalCase(primaryField(model).Name)
+	sPr := primaryField(model).Name
 	sb.WriteString(fmt.Sprintf(`
 	func (%s *%sHandler)Update%s(w http.ResponseWriter, r *http.Request) {
 	var req%s models.Requested%s
@@ -227,12 +231,12 @@ func updateHand(nameLower, nameCapital string) string {
 		return
 	}
 
-	if req%s.Id == 0 {
-		badErrorRequest(w, r, errors.New("please put the id in the json body"))
+	if req%s.%s == 0 {
+		badErrorRequest(w, r, errors.New("please put the %s in the json body"))
 		return
 	}
-	if req%s.Id < 0 {
-		badErrorRequest(w, r, errors.New("please use valid id"))
+	if req%s.%s < 0 {
+		badErrorRequest(w, r, errors.New("please use valid %s"))
 		return
 	}
 
@@ -248,36 +252,40 @@ func updateHand(nameLower, nameCapital string) string {
 	}
 	}
 `, nameLower[0:1], nameLower, nameCapital,
-		nameCapital, nameCapital, nameCapital, nameCapital, nameCapital, nameLower,
+		nameCapital, nameCapital, nameCapital, nameCapital,
+		pr, sPr, nameCapital, pr, sPr, nameLower,
 		nameLower[0:1], nameLower, nameCapital, nameCapital, nameLower, nameLower,
 	))
 
 	return sb.String()
 }
 
-func deleteHand(nameLower, nameCapital string) string {
+func deleteHand(nameLower, nameCapital string, model parser.Model) string {
+	pr := toPascalCase(primaryField(model).Name)
+
+	sPr := primaryField(model).Name
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(`
 	func(%s *%sHandler) Delete%s(w http.ResponseWriter, r *http.Request) {
 		
-	var reqId models.Requested%sId
+	var req%s models.Requested%s%s
 
-	err := readJson(w, r, &reqId)
+	err := readJson(w, r, &req%s)
 	if err != nil {
 		badErrorRequest(w, r, err)
 		return
 	}
 
 	
-	if reqId.Id == 0 {
-		badErrorRequest(w, r, errors.New("please put the id field in the json body"))
+	if req%s.%s == 0 {
+		badErrorRequest(w, r, errors.New("please put the %s field in the json body"))
 		return
 	}
-	if reqId.Id < 0 {
-		badErrorRequest(w, r, errors.New("please use valid id"))
+	if req%s.%s < 0 {
+		badErrorRequest(w, r, errors.New("please use valid %s"))
 		return
 	}
-	serErr := %s.%sServices.Delete%s(reqId.Id)
+	serErr := %s.%sServices.Delete%s(req%s.%s)
 	if serErr != nil {
 			mapResponseToError(serErr,w,r)
 		return
@@ -288,8 +296,9 @@ func deleteHand(nameLower, nameCapital string) string {
 		serverErrorResonse(w, r, err)
 	}
 	}
-`, nameLower[0:1], nameLower, nameCapital, nameCapital,
-		nameLower[0:1], nameLower, nameCapital,
+`, nameLower[0:1], nameLower, nameCapital, pr, nameCapital, pr, pr,
+		pr, pr, sPr, pr, pr, sPr,
+		nameLower[0:1], nameLower, nameCapital, pr, pr,
 	))
 	return sb.String()
 }
@@ -433,8 +442,14 @@ func errorConflict(w http.ResponseWriter, r *http.Request,err error) {
 		var err error
 	switch bk.Type {
 	case backerror.DB_DELETE:
+		err = bk.Message.(error)
+		serverErrorResonse(w, r, err)
 	case backerror.DB_INSERT:
+		err = bk.Message.(error)
+		serverErrorResonse(w, r, err)
 	case backerror.DB_UPDATE:
+		err = bk.Message.(error)
+		serverErrorResonse(w, r, err)
 	case backerror.DB_GET:
 		err = bk.Message.(error)
 		serverErrorResonse(w, r, err)
@@ -449,6 +464,10 @@ func errorConflict(w http.ResponseWriter, r *http.Request,err error) {
 		fmt.Println(err,bk.Message,bk)
 
 		errorConflict(w, r, err)
+	case backerror.FOREIGN_CONSTRAINTS:
+		err = bk.Message.(error)
+		fmt.Println(err,bk.Message,bk)
+		badErrorRequest(w, r,err)
 
 	default:
 		serverErrorResonse(w, r, bk.Message.(error))

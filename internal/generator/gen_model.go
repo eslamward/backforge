@@ -59,7 +59,12 @@ func GenerateModel(model parser.Model) string {
 	}
 
 	sb.WriteString("}\n\n")
-	sb.WriteString(fmt.Sprintf("type Requested%sId struct  {\nId int64 `json:\"id\"`\n}\n\n", structName))
+	sb.WriteString(
+		fmt.Sprintf("type Requested%s%s struct  {\n%s %s `json:\"%s\"`\n}\n\n",
+			structName, toPascalCase(primaryField(model).Name),
+			toPascalCase(primaryField(model).Name),
+			mapType(primaryField(model).Type),
+			primaryField(model).Name))
 
 	if uniqeField(model) != nil {
 		uLower := uniqeField(model).Name
