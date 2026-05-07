@@ -61,13 +61,12 @@ open your terminal in the folder that contains the BackForge tool
 backforge build    → generates the code and builds the app
 backforge serve    → serves the application on port 8080
 
-or if you use the latest binary it will be `<os>.backforge` build er `(windows.backforg buil)` 
 ```
 * when run build cli the go1.25.* will downloaded and ziped in the .chach folder in your project folder
 and you don't need to download the go again if you use the tool in the same folder that .chach found
 * Generate project file
 * get chi router
-* get sqlite
+* get sqlite by default or the database you have in (postgres - mysql - sqlserver) 
 * build the code to the app binary  `bin/app`
 
 You can verify the API using:
@@ -75,7 +74,7 @@ You can verify the API using:
 
 This endpoint lists all available APIs for generated entities.
 
-After build, the output will be located in `bin/` including the `app.db` file.
+After build, the output will be located in `bin/` including the `app.db` file if you use the default database .
 
 ---
 
@@ -88,6 +87,13 @@ app.yaml → parser → generator → filesystem → Go project → build toolch
 ---
 
 # YAML File Structure Example
+
+## Database Supported
+
+* postgres
+* sqlserver
+* mysql
+* sqlie by default
 
 ## Types you can use:
 
@@ -110,6 +116,18 @@ app.yaml → parser → generator → filesystem → Go project → build toolch
 * max_length (for text)
 
 ```text
+configuration:
+  server_config:
+    port: 8080   --default 8080
+    env: dev     --default dev
+ 
+  database_config:
+    type: postgres  --default null
+    name: db_name   --default null
+    host: localhost --default localhost
+    port: 5432      --default null
+    user: postgres  --default null
+    password: pass  --defaul null
 models:
   - name: students
     fields:
@@ -229,14 +247,14 @@ BackForge follows semantic versioning:
 Example:
 
 ```
-v1.0.0
+v1.1.0
 ```
 
 ---
 
 # Changelog
 
-## v1.0.0
+## v1.1.0
 
 * Initial release
 * YAML parser
