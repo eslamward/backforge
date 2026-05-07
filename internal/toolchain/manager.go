@@ -31,8 +31,10 @@ func EnsureGo() (string, error) {
 	// create cache folder
 	os.MkdirAll(".cache/go", os.ModePerm)
 
-	zipPath := ".cache/go.zip"
-
+	zipPath := ".cache/go.tar.gz"
+	if runtime.GOOS == "windows" {
+		zipPath = ".cache/go.zip"
+	}
 	// download
 	err := DownloadGo(getGoURL(), zipPath)
 	if err != nil {
